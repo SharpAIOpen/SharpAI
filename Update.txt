@@ -1,1 +1,1 @@
-SharpAI beta v1.0
+SharpAI beta v1.1
