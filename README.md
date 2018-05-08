@@ -8,6 +8,9 @@ written and designed by Martin Kober, 2017
 <br />
 -NeuroEvolution of Augmenting Topologies (NEAT) based on MarI/O https://www.youtube.com/watch?v=qv6UVOQ0F44
 
+## Intention
+Learn how the algorithms of neural networks work and apply them to your own projects
+
 ## Requirement
 -Microsoft Visual Studio 2017 (Community Edition)
 
@@ -17,6 +20,7 @@ written and designed by Martin Kober, 2017
 2.) unpack
 <br />
 3.) open SharpAI.sln
+<br />
 4.) watch video how to use on YT
 
 ## License
