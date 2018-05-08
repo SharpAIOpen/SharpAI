@@ -4,7 +4,9 @@ using Core.Modifications;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using static NeuralNet.Project.NetMario;
@@ -147,6 +149,9 @@ namespace NeuralNet.Project
             MainClock = new Timer();
             MainClock.Interval = 1000;
 
+            //CHECK FOR UPDATES
+            UpdateCheck();
+
             //GLOBAL LISTENR
             new UniGlobal();
 
@@ -171,6 +176,28 @@ namespace NeuralNet.Project
                     case Keys.F12: ToggleSend.Checked = !ToggleSend.Checked; break;
                 }
             };
+        }
+
+        private async void UpdateCheck()
+        {            
+            try
+            {
+                //CHECK GIT FOR UPDATES
+                HttpClient client = new HttpClient();
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, "https://github.com/SharpAIOpen/SharpAI/blob/master/Update.txt");
+                HttpResponseMessage response = await client.SendAsync(request);
+                String jsonStr = await response.Content.ReadAsStringAsync();
+                bool update = !jsonStr.Contains(Text);
+
+                //IF UPDATE AVAILABLE
+                if (update)
+                    if(UniMsg.Show("Update available..", "A new SharpAI version is under https://github.com/SharpAIOpen/SharpAI available!\n\nDownload now?", MessageBoxButtons.OKCancel, MSGICON.LAMP))
+                        System.Diagnostics.Process.Start("https://github.com/SharpAIOpen/SharpAI");
+
+                client.Dispose();
+            }
+            catch
+            {}
         }
 
         private UniPanel createPanelProperties()
@@ -324,7 +351,7 @@ namespace NeuralNet.Project
             btnSave.Click += (s, e) => Mario.Save();                                                //SAVE TXT
             btnReset.Click += (s, e) => Mario.Initialize(TableLive.getKeys());                      //RESET
 
-            RoundFinished = new Action<int>((int xScore)=>
+            RoundFinished = new Action<int>((int xScore) =>
             {
                 if (Mario.Pool == null) return;
                 TimeSpan duration = Mario.Duration;
@@ -349,7 +376,7 @@ namespace NeuralNet.Project
 
                 //ADD CHART SERIES POINT
                 ScoreSeries.Points.Add(xScore);
-                ScoreChart.AnnotationText(ScoreFont, "(" + gen + ", " + species + ", " + genome + ")", new DataPoint(ScoreSeries.Points.Count-0.15, xScore), 0, 0, ContentAlignment.MiddleCenter);
+                ScoreChart.AnnotationText(ScoreFont, "(" + gen + ", " + species + ", " + genome + ")", new DataPoint(ScoreSeries.Points.Count - 0.15, xScore), 0, 0, ContentAlignment.MiddleCenter);
 
                 //DYNAMIC Y-AXIS
                 int max = 7;

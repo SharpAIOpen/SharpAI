@@ -1,4 +1,4 @@
-using Core.Enums;
+﻿using Core.Enums;
 using System;
 using System.Windows.Forms;
 
