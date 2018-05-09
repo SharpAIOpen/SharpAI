@@ -35,13 +35,13 @@
     <ApplicationIcon>NeuralNet.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="CoreLite, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\Core.dll</HintPath>
+      <HintPath>..\..\CoreLite\CoreLite\bin\Debug\CoreLite.dll</HintPath>
     </Reference>
-    <Reference Include="itextsharp, Version=5.5.11.0, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+    <Reference Include="Gma.System.MouseKeyHook, Version=5.4.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>.\itextsharp.dll</HintPath>
+      <HintPath>..\..\CoreLite\CoreLite\bin\Debug\Gma.System.MouseKeyHook.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -102,9 +102,8 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="CoreLite.dll" />
     <Content Include="NeuralNet.ico" />
-    <Content Include="Core.dll" />
-    <Content Include="itextsharp.dll" />
     <Content Include="Save\learning_pool 80x60 %28112, 5 of 10, 60%25%29.txt" />
     <Content Include="Save\NeuralNetwork Training 60-100-1.xml" />
   </ItemGroup>
