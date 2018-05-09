@@ -103,6 +103,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="CoreLite.dll" />
+    <Content Include="Gma.System.MouseKeyHook.dll" />
     <Content Include="NeuralNet.ico" />
     <Content Include="Save\learning_pool 80x60 %28112, 5 of 10, 60%25%29.txt" />
     <Content Include="Save\NeuralNetwork Training 60-100-1.xml" />
