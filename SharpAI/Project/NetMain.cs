@@ -4,7 +4,6 @@ using Core.Modifications;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Windows.Forms;
@@ -90,6 +89,7 @@ namespace NeuralNet.Project
         public UniTrack TrackOpacity;
         public UniTrack TrackZoom;
         public UniToggle ToggleLearn;
+        public UniToggle ToggleCam;
         public UniToggle ToggleQuery;
         public UniToggle ToggleTeach;
         public UniToggle ToggleSend;
@@ -164,10 +164,14 @@ namespace NeuralNet.Project
                 switch (e.KeyData)
                 {
                     case Keys.Space: //KILL SWITCH
-                        ToggleQuery.Checked = false;
-                        ToggleTeach.Checked = false;
-                        ToggleSend.Checked = false;
-                        ToggleLearn.Checked = false;
+                        if (ToggleQuery.Checked || ToggleTeach.Checked || ToggleSend.Checked || ToggleLearn.Checked)
+                        {
+                            setConsoleInvoke("[SPACE] Kill switch, all actions terminated", true);
+                            ToggleQuery.Checked = false;
+                            ToggleTeach.Checked = false;
+                            ToggleSend.Checked = false;
+                            ToggleLearn.Checked = false;
+                        }
                         break;
 
                     case Keys.F9: ToggleLearn.Checked = !ToggleLearn.Checked; break;
@@ -179,7 +183,7 @@ namespace NeuralNet.Project
         }
 
         private async void UpdateCheck()
-        {            
+        {
             try
             {
                 //CHECK GIT FOR UPDATES
@@ -191,13 +195,13 @@ namespace NeuralNet.Project
 
                 //IF UPDATE AVAILABLE
                 if (update)
-                    if(UniMsg.Show("Update available..", "A new SharpAI version is under https://github.com/SharpAIOpen/SharpAI available!\n\nDownload now?", MessageBoxButtons.OKCancel, MSGICON.LAMP))
+                    if (UniMsg.Show("Update available..", "A new SharpAI version is under https://github.com/SharpAIOpen/SharpAI available!\n\nDownload now?", MessageBoxButtons.OKCancel, MSGICON.LAMP))
                         System.Diagnostics.Process.Start("https://github.com/SharpAIOpen/SharpAI");
 
                 client.Dispose();
             }
             catch
-            {}
+            { }
         }
 
         private UniPanel createPanelProperties()
@@ -206,7 +210,7 @@ namespace NeuralNet.Project
             UniPanel panelProperties = UniPanel.Create(this, startposition[0], startposition[1], (Width / 2) - (startposition[0] * 2), ctlHeight[1], BorderStyle.FixedSingle);
 
             //CREATE COMBOBOX
-            ComboType = UniCombo.Create(panelProperties, "Type:", TypeItems, "choose neural network type", startposition[0], startposition[0], ctlWidth[1], ctlHeight[0], TypeItems[0]);
+            ComboType = UniCombo.Create(panelProperties, "Network type:", TypeItems, "choose neural network type", startposition[0], startposition[0], ctlWidth[1], ctlHeight[0], TypeItems[0]);
 
             //CREATE BUTTONS
             UniButton btnNew = UniButton.Create(panelProperties, "New", "initzialize a new neural network", Mod_Forms.sameLeft(ComboType), Mod_Forms.nextTop(ComboType, gap[0]), ctlWidth[1], new Action(() => { neuralNetworkNew(); }));
@@ -344,6 +348,7 @@ namespace NeuralNet.Project
                     //RESET SERIES
                     ScoreChart.Clear();
                     ScoreSeries = ScoreChart.SeriesLine("Score", SeriesChartType.Line, Color.Red, 1, null);
+                    ScoreChart.Focus();
                 }
                 Mario.Run(TableLive.getKeys());
             };
@@ -353,6 +358,7 @@ namespace NeuralNet.Project
 
             RoundFinished = new Action<int>((int xScore) =>
             {
+                //ROUND FINISHED ACTION
                 if (Mario.Pool == null) return;
                 TimeSpan duration = Mario.Duration;
                 if (Mario.Learning) duration = duration + (DateTime.Now - Mario.Start);
@@ -374,7 +380,11 @@ namespace NeuralNet.Project
                 textFitness.Text = Cam.Score + " (" + currSpecies.averageFitness + ")";                                                 //FITNESS
                 textMeasured.Text = Mod_Convert.DoubleToString(Mario.Pool.measured) + "%";                                              //MEASURED
 
-                //ADD CHART SERIES POINT
+                //ABBRUCH
+                if (xScore == 0)
+                    return;
+
+                //ADD CHART SERIES POINT                
                 ScoreSeries.Points.Add(xScore);
                 ScoreChart.AnnotationText(ScoreFont, "(" + gen + ", " + species + ", " + genome + ")", new DataPoint(ScoreSeries.Points.Count - 0.15, xScore), 0, 0, ContentAlignment.MiddleCenter);
 
@@ -462,14 +472,15 @@ namespace NeuralNet.Project
             LabelFps = UniLabel.Create(panelLive, string.Empty, Mod_Forms.nextLeft(labelFps), Mod_Forms.sameTop(labelFps), 0, 0, labelFps.Font);
 
             //CREATE CAM AND LEARNING TOGGLE
-            UniButton btnCam = UniButton.Create(panelLive, string.Empty, "open camera window", Mod_Forms.sameLeft(showPanel), Mod_Forms.nextTop(PanelDraw, gap[0]), ctlWidth[0], gap[0], null, ICON.CAMERA_WALL);
+            ToggleCam = UniToggle.Create(panelLive, string.Empty, "open camera window", Mod_Forms.sameLeft(showPanel), Mod_Forms.nextTop(PanelDraw, gap[0]), ctlWidth[0], gap[0], false);
+            ToggleCam.Image = Mod_PNG.getImage(ICON.CAMERA_WALL);
 
             //CREATE FPS SPIN
-            SpinFps = UniSpin.Create(panelLive, "Fps:", "set frames per second of camera", Mod_Forms.nextLeft(btnCam, gap[0]), Mod_Forms.sameTop(btnCam), 1, 40, 1, 25);
+            SpinFps = UniSpin.Create(panelLive, "Fps:", "set frames per second of camera", Mod_Forms.nextLeft(ToggleCam, gap[0]), Mod_Forms.sameTop(ToggleCam), 1, 40, 1, 25);
             SpinDelay = UniSpin.Create(panelLive, "Delay:", "set frame delay between camera and the net-view", SpinFps.Left, Mod_Forms.nextTop(SpinFps, gap[0]), 0, 40, 1, 0);
 
             //CREATE OPACITY TRACKBAR
-            TrackOpacity = UniTrack.Create(panelLive, "Opacity:", "opacity of camera", Mod_Forms.nextLeft(SpinFps, gap[0]), Mod_Forms.nextTop(btnCam), gap[4], gap[0], 1, 100, 1, 50, TickStyle.BottomRight, Orientation.Horizontal, 1, " x");
+            TrackOpacity = UniTrack.Create(panelLive, "Opacity:", "opacity of camera", Mod_Forms.nextLeft(SpinFps, gap[0]), Mod_Forms.nextTop(ToggleCam), gap[4], gap[0], 1, 100, 1, 50, TickStyle.BottomRight, Orientation.Horizontal, 1, " x");
             TrackOpacity.setScale(0.01);
 
             //CREATE ZOOM TRACKBAR
@@ -485,7 +496,7 @@ namespace NeuralNet.Project
             TableLive = new NetTable(panelLive, Mod_Forms.nextLeft(binaryPanel, gap[1]), binaryPanel.Top, ToggleSend.Right - Mod_Forms.nextLeft(binaryPanel, gap[1]), binaryPanel.Height);
 
             //CLICK ACTION
-            btnCam.Click += (s, e) => { Cam.Visible = !Cam.Visible; };
+            ToggleCam.CheckedChanged += (s, e) => { Cam.Visible = ToggleCam.Checked; };
 
             //EVENT LISTENER
             ToggleSend.CheckedChanged += (s, e) => { if (!ToggleSend.Checked && NetCam.LastCell != null) NetCam.LastCell.Style.BackColor = Color.White; else FormLive.Focus(); };
@@ -1051,9 +1062,13 @@ namespace NeuralNet.Project
                 for (int i = 0; i < h; i++)
                     outputs.Add(Net.weightOutput[j, i]);
 
+            //SELECT NAME
+            string name = ComboType.Text + " Network Properties [" + Net.NodesInput + "-" + Net.NodesHidden + "-" + Net.NodesOutput + "]";
+            if (ComboType.SelectedIndex == 1) name = ComboType.Text + " Network Properties [" + Net.PixelWidth + "x" + Net.PixelHeight + "-" + NeatPopulation.getInteger() + "-" + NeatStalness.getInteger() + "]";
+
             //SAVE TRAINING
             object[] network = new object[] { properties, settings, tableTrain, tableLive, inputs.ToArray(), outputs.ToArray() };
-            Mod_XML.Serialize(ComboType.Text + " Network Properties [" + Net.NodesInput + "-" + Net.NodesHidden + "-" + Net.NodesOutput + "]", network, typeof(object[]));
+            Mod_XML.Serialize(name, network, typeof(object[]));
 
             //FEEDBACK
             setConsoleInvoke("Neural network saved in " + Mod_XML.LastPath);
@@ -1195,6 +1210,11 @@ namespace NeuralNet.Project
                 EnableAction(true);
                 setPanelEnable(false);
                 setLabelNetwork(false);
+                if (ToggleLearn.Checked) ToggleLearn.Checked = false;
+                if (ToggleCam.Checked) ToggleCam.Checked = false;
+                if (ToggleQuery.Checked) ToggleQuery.Checked = false;
+                if (ToggleTeach.Checked) ToggleTeach.Checked = false;
+                if (ToggleSend.Checked) ToggleSend.Checked = false;
             }
         }
 

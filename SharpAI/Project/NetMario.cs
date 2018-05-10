@@ -350,6 +350,9 @@ namespace NeuralNet.Project
 
             initializeRun();
 
+            //UPDATE LEARN PANEL
+            NetMain.RoundFinished(0);
+
             //END LOADING
             UniLoad.loadingEnd();
         }
