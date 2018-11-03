@@ -7,6 +7,7 @@ written and designed by Martin Kober, 2018
 -Classifier (Perceptron) for digit recognition as example
 <br />
 -NeuroEvolution of Augmenting Topologies (NEAT) based on MarI/O https://www.youtube.com/watch?v=qv6UVOQ0F44
+-NEW: Pong python3 example - two instances of the algorythm play each other, go for Readme.txt (SharpAI/Pong/Readme.txt) for more info
 
 ## Intention
 Learn how the algorithms of neural networks work and apply them to your own projects
